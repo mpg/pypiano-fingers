@@ -118,6 +118,7 @@ class Mode:
     def __init__(self, index):
         self.intervals = self.intervals_list[index]
         self.name = self.names[index]
+        self.index = index
 
     def __str__(self):
         return self.name
@@ -291,12 +292,6 @@ class Scale:
 
 if __name__ == '__main__':
     pass
-
-    # # print standard fingering of all LH minor scales by circle of fifths
-    # for note in Note.each(7):
-    #     scale = Scale(note + (-3), Mode(1))
-    #     lh = scale.fingerings(right_hand=False)[0]
-    #     print('{: <10} {}'.format(str(scale), lh))
 
     # # group scales by fingering
     # groups = dict()
