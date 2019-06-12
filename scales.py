@@ -290,25 +290,13 @@ class Scale:
 
 
 if __name__ == '__main__':
-    # select a random scale and print its fingering (for daily practice)
-    scale = Scale.random()
-    rh = scale.fingerings(right_hand=True)[0]
-    lh = scale.fingerings(right_hand=False)[0]
-    print('{} {} {}'.format(scale, rh, lh))
+    pass
 
     # # print standard fingering of all LH minor scales by circle of fifths
     # for note in Note.each(7):
     #     scale = Scale(note + (-3), Mode(1))
     #     lh = scale.fingerings(right_hand=False)[0]
     #     print('{: <10} {}'.format(str(scale), lh))
-
-    # # explore all options for a specific scale and hand
-    # scale = Scale(Note(5), Mode(0))
-    # print(scale)
-    # fs = scale.fingerings(right_hand=True)
-    # for i in range(len(fs) - 1):
-    #     print(fs[i], fs[i].compare(fs[i+1]))
-    # print(fs[-1])
 
     # # group scales by fingering
     # groups = dict()
