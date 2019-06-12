@@ -295,12 +295,6 @@ if __name__ == '__main__':
     #     spellings = (' '.join(notes) for notes in scale.spellings())
     #     print(scale, '-', ' / '.join(spellings))
 
-    # # print standard fingering for each scale
-    # for scale in Scale.each(True):
-    #     rh = scale.fingerings(right_hand=True)[0]
-    #     lh = scale.fingerings(right_hand=False)[0]
-    #     print('{: <10} {} {}'.format(str(scale), rh, lh))
-
     # select a random scale and print its fingering (for daily practice)
     scale = Scale.random()
     rh = scale.fingerings(right_hand=True)[0]
