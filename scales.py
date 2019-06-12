@@ -302,18 +302,6 @@ if __name__ == '__main__':
     #     lh = scale.fingerings(right_hand=False)[0]
     #     print('{: <10} {}'.format(str(scale), lh))
 
-    # # print standard fingering for each scale+hand with deciding criterion
-    # for scale in Scale.each():
-    #     name = str(scale).ljust(10)
-    #     for hand_name, right in (('RH', True), ('LH', False)):
-    #         fingerings = scale.fingerings(right_hand=right)
-    #         best = fingerings[0]
-    #         if len(fingerings) == 1:
-    #             reason = '(single)'
-    #         else:
-    #             reason = best.compare(fingerings[1])[1]
-    #         print(name, hand_name, best, len(fingerings), reason)
-
     # # explore all options for a specific scale and hand
     # scale = Scale(Note(5), Mode(0))
     # print(scale)
