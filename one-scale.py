@@ -20,7 +20,7 @@ def print_comparison(fingerings):
 scale = Scale.random()
 rh = scale.fingerings(right_hand=True)
 lh = scale.fingerings(right_hand=False)
-print('{} {} {}'.format(scale, rh[0], lh[0]))
+print('{} {} {}'.format(scale, lh[0], rh[0]))
 
-print_comparison(rh)
 print_comparison(lh)
+print_comparison(rh)

@@ -39,7 +39,7 @@ for scale in Scale.each(not args.chromatic):
     else:
         rh = scale.fingerings(right_hand=True)
         lh = scale.fingerings(right_hand=False)
-        print('{: <10} {} {}'.format(str(scale), rh[0], lh[0]), end='')
+        print('{: <10} {} {}'.format(str(scale), lh[0], rh[0]), end='')
         if args.explain:
-            print('', reason(rh), reason(lh), end='')
+            print('', reason(lh), reason(rh), end='')
         print()
