@@ -124,6 +124,8 @@ class Mode:
     names = ('Majeur', 'Mineur')
     # # English
     # names = ('Major', 'Minor')
+    # # German
+    # names = ('dur', 'moll')
 
     # modes represented by number of half-steps between successive notes
     intervals_list = (
