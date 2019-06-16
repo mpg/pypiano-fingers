@@ -4,6 +4,7 @@ set -eu
 
 # general source quality checks
 flake8 *.py
+pydocstyle *.py
 
 # compare computed fingering to reference
 ./all-scales.py     > my-scales-harmonic

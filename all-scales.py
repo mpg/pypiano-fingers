@@ -3,9 +3,7 @@
 
 # Written by Manuel Pégourié-Gonnard, 2019. WTFPL v2.
 
-"""
-Print all scales with their standard fingering.
-"""
+"""Print all scales with their standard fingering."""
 
 import argparse
 
@@ -47,7 +45,7 @@ allowed_hands = {
 
 
 def reason(fingerings):
-    """Return the reason why the standard fingering is preferred"""
+    """Return the reason why the standard fingering is preferred."""
     if len(fingerings) == 1:
         return '(single)'
 

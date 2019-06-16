@@ -3,9 +3,7 @@
 
 # Written by Manuel Pégourié-Gonnard, 2019. WTFPL v2.
 
-"""
-Print groups of scales that share the same fingering.
-"""
+"""Print groups of scales that share the same fingering."""
 
 import argparse
 

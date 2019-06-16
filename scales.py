@@ -2,13 +2,24 @@
 
 # Written by Manuel Pégourié-Gonnard, 2019. WTFPL v2.
 
+"""
+Tools for exploring the scales and their fingering at the piano.
+
+Classes:
+    - Note: one of the 12 notes.
+    - Mode: major or minor (harmonic).
+    - ScaleFingering: a fingering of a scale.
+    - Scale: a scale, defined by tonic and mode.
+"""
+
 import secrets
 
 
 class Note:
     """
     One of the 12 notes in the chromatic scale.
-    Internally represented by its index, 0 = Do/C
+
+    Internally represented by its index, 0 = Do/C.
     """
 
     # https://en.wikipedia.org/wiki/Musical_note#12-tone_chromatic_scale
@@ -34,24 +45,36 @@ class Note:
 
     @staticmethod
     def each(stride=1):
+        """
+        Iterate over notes, chromatically or by a given interval.
+
+        The stride is usually 1 (default) or 7 (circle of fifths).
+        The interval must be co-prime with 12 (ie not 2, 3, 4, 6) if you want
+        to reach each of the 12 notes.
+        """
         return (Note(rank % 12) for rank in range(0, 12 * stride, stride))
 
     @staticmethod
     def random():
+        """Return a note chosen at random."""
         return Note(secrets.randbelow(12))
 
     def __init__(self, rank):
+        """Create a note with the given rank."""
         self.rank = rank
 
     def is_black(self):
+        """Tell if the key corresponding to that note is black on a piano."""
         return self.rank not in self.white_keys
 
     @classmethod
     def whites_from(cls, from_note):
+        """Iterate over white keys from the given starting point."""
         i = cls.white_keys.index(from_note)
         return cls.white_keys[i:] + cls.white_keys[:i]
 
     def closest_white_keys(self):
+        """Find the white keys (unaltered notes) closest from self."""
         prv = -1
         for cur in self.white_keys:
             if cur == self.rank:
@@ -61,6 +84,7 @@ class Note:
             prv = cur
 
     def name_with_base_white(self, base_white):
+        """Return our name by adding alterations to the given base."""
         base_name = self.white_names[base_white]
 
         distance = (self.rank - base_white) % 12
@@ -83,17 +107,17 @@ class Note:
         return full_name
 
     def __str__(self):
+        """Return string represention, prefering unaltered and sharps."""
         return self.name_with_base_white(self.closest_white_keys()[0])
 
     def __add__(self, half_steps):
+        """Return the note a given number of half-steps above ourselves."""
         new_rank = (self.rank + half_steps) % 12
         return Note(new_rank)
 
 
 class Mode:
-    """
-    One of the common modes: for now, major and minor harmonic
-    """
+    """One of the common modes: for now, major and minor harmonic."""
 
     # mode names
     # French
@@ -109,27 +133,36 @@ class Mode:
 
     @classmethod
     def each(cls):
+        """Iterate over all available modes."""
         return (Mode(i) for i in range(len(cls.intervals_list)))
 
     @classmethod
     def random(cls):
+        """Return a mode chosen at random."""
         return Mode(secrets.randbelow(len(cls.intervals_list)))
 
     def __init__(self, index):
+        """Create a mode given by its index: 0 = Major, 1 = Minor harmonic."""
         self.intervals = self.intervals_list[index]
         self.name = self.names[index]
         self.index = index
 
     def __str__(self):
+        """Return the name of the mode."""
         return self.name
 
 
 class ScaleFingering:
-    """A fingering for a 7-notes scale"""
+    """A fingering for a 7-notes scale."""
 
     base = (1, 2, 3, 1, 2, 3, 4)
 
     def __init__(self, scale_8_notes, i, *, right_hand):
+        """Create a fingering for the given notes, hand and index.
+
+        The index is used to rotate the basic fingering 1231234 into one of
+        the 7 possible fingerings that follow the same pattern.
+        """
         # For left hand, internally work with descending fingering
         # in order to unify with right hand:
         # - reverse the notes internally;
@@ -145,31 +178,32 @@ class ScaleFingering:
         self.fingers += (5 if self.fingers[-1] == 4 else self.fingers[0], )
 
     def __str__(self):
+        """Return fingering as a string of 8 digits."""
         return ''.join(self.symmetry(tuple(str(f) for f in self.fingers)))
 
     @staticmethod
     def each(scale_8_notes, *, right_hand):
+        """Iterate of all possible fingerings for a given 8-note series."""
         return (ScaleFingering(scale_8_notes, i, right_hand=right_hand)
                 for i in range(7))
 
     def is_acceptable(self):
-        """Fingerings that put the thumb on a black key are not acceptable"""
+        """Return False if that fingering puts the thumb on a black key."""
         for note, finger in zip(self.notes, self.fingers):
             if finger == 1 and note.is_black():
                 return False
         return True
 
     def ends_with_pinky(self):
-        """Is this the familiar C major fingering?"""
+        """Return True if this is the familiar C Major fingering."""
         return self.fingers[-1] == 5
 
     def starts_with_thumb(self):
-        """Do we start the scale with the thumb?"""
+        """Return True if this fingering puts the thumb on the tonic."""
         return self.fingers[0] == 1
 
     def has_long_passing(self):
-        """Do we have thumb passing on intervals larger than a second?
-        (This is inconvenient, and can only happen in minor scales.)"""
+        """Return True on thumb-passings on interval larger than a second."""
         for i in range(7):
             dist = abs(self.notes[i].rank - self.notes[i-1].rank)
             if dist > 6:
@@ -179,8 +213,7 @@ class ScaleFingering:
         return False
 
     def nb_black_passings(self):
-        """Number of times passing the thumb after a black key
-        (which is convenient as it leaves more room underneath)"""
+        """Return the number of times passing the thumb after a black key."""
         black_passings = 0
         for i in range(7):
             if self.fingers[i] == 1 and self.notes[i-1].is_black():
@@ -188,13 +221,15 @@ class ScaleFingering:
         return black_passings
 
     def compare(self, other):
-        """Return (pref, reason) where pref is:
-        +1 if self is better than other,
-        0 if they have equal preference,
-        -1 otherwise
-        and reason is a string representing the criterion used to
-        differentiate them"""
+        """Compare to another fingering and return preference code and reason.
 
+        The preference code is:
+            - +1 if self is better than other,
+            - 0 if they have equal preference,
+            - -1 otherwise.
+
+        The reason (str) represents the differentiating criterion.
+        """
         # this function was designed to prefer the standard fingering
         # for each of the 24 major and minor (harmonic) scales for both hands
         #
@@ -217,15 +252,17 @@ class ScaleFingering:
         return 0, ''
 
     def __lt__(self, other):
+        """Return True if self is preferred to other."""
         # define "less than" as "preferred" so that sorting
         # puts the preferred fingerings first without reversing
         return self.compare(other)[0] > 0
 
 
 class Scale:
-    """A 7-notes scale defined by tonic and mode"""
+    """A 7-notes scale defined by tonic and mode."""
 
     def __init__(self, tonic, mode):
+        """Create scale based on tonic (Note) and mode (Mode)."""
         self.tonic = tonic
         self.mode = mode
 
@@ -239,6 +276,11 @@ class Scale:
 
     @staticmethod
     def each(circle_of_fifths=True):
+        """Iterate over all scales, by circle of fifths of chromatically.
+
+        Circle of fifths starts with: C Major, A Minor, G Major, E Minor, etc.
+        Chromatic starts with: C Major, C Minor, D♭ Major, C♯ Minor, etc.
+        """
         if not circle_of_fifths:
             return (Scale(note, mode)
                     for note in Note.each()
@@ -250,14 +292,16 @@ class Scale:
 
     @staticmethod
     def random():
+        """Return a scale chosen at random."""
         return Scale(Note.random(), Mode.random())
 
     def spellings(self):
-        """A one or two-element list of 7-tuples with note names.
+        """Return a one or two-element list of 7-tuples with note names.
 
         Choose the spelling with no double-sharps or double-flats, and the
         least number of sharps/flats in the note names, and return both in
-        case of equality."""
+        case of equality.
+        """
         scale_candidates = []
         nb_alt_prev = 7
         for tonic_base in self.tonic.closest_white_keys():
@@ -283,8 +327,10 @@ class Scale:
         return scale_candidates
 
     def __str__(self):
+        """Return the name of the scale (tonic + mode) as a string."""
         return self.spellings()[0][0] + ' ' + str(self.mode)
 
     def fingerings(self, *, right_hand):
+        """Return a tuple of acceptable fingers with most preferred first."""
         fs = ScaleFingering.each(self.notes, right_hand=right_hand)
         return tuple(sorted(f for f in fs if f.is_acceptable()))
