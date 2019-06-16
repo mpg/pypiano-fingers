@@ -288,19 +288,3 @@ class Scale:
     def fingerings(self, *, right_hand):
         fs = ScaleFingering.each(self.notes, right_hand=right_hand)
         return tuple(sorted(f for f in fs if f.is_acceptable()))
-
-
-if __name__ == '__main__':
-    pass
-
-    # # group scales by fingering
-    # groups = dict()
-    # for scale in Scale.each(True):
-    #     rh = str(scale.fingerings(right_hand=True)[0])
-    #     lh = str(scale.fingerings(right_hand=False)[0])
-    #     index = (rh, lh)
-    #     if index not in groups:
-    #         groups[index] = list()
-    #     groups[index].append(scale)
-    # for (rh, lh), scales in groups.items():
-    #     print(rh, lh, ' '.join(str(s) for s in scales))
