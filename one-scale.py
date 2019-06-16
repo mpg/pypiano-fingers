@@ -3,9 +3,18 @@
 
 # Written by Manuel Pégourié-Gonnard, 2017. WTFPL v2.
 
-"""Print information about a scale (for now, chosen at random)."""
+"""Print information about a scale (given by its index or chosen at random)."""
 
-from scales import Scale
+import argparse
+
+from scales import Scale, Note, Mode
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('index',
+                    help='0 = C Major, 1 = C Minor, 2 = D♭ Major...',
+                    action='store', type=int,
+                    nargs='?', default=None)
+args = parser.parse_args()
 
 
 def print_comparison(fingerings):
@@ -16,7 +25,11 @@ def print_comparison(fingerings):
     print(fingerings[-1])
 
 
-scale = Scale.random()
+if args.index:
+    scale = Scale(Note(args.index // 2), Mode(args.index % 2))
+else:
+    scale = Scale.random()
+
 rh = scale.fingerings(right_hand=True)
 lh = scale.fingerings(right_hand=False)
 print('{} {} {}'.format(scale, lh[0], rh[0]))
