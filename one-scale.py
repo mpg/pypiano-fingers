@@ -16,6 +16,9 @@ parser.add_argument('index',
                     help='0 = C Major, 1 = C Minor, 2 = D♭ Major...',
                     action='store', type=int,
                     nargs='?', default=None)
+parser.add_argument('-a', '--all',
+                    help='show all acceptable fingerings',
+                    action='store_true')
 args = parser.parse_args()
 
 code_std_pos = {
@@ -30,12 +33,17 @@ code_score = {
 }
 
 
-def color(name, std_pos, score):
+def color(name, std_pos, score, width):
     """Apply color-coding to note name."""
     return (code_std_pos[std_pos] +
             code_score[score] +
-            name.ljust(4) +
+            name.ljust(width) +
             Style.RESET_ALL)
+
+
+def pad(fingering, width):
+    """Return fingering as a string, each note padded to the given width."""
+    return ''.join(str(f).ljust(width) for f in str(fingering))
 
 
 if args.index:
@@ -49,10 +57,16 @@ note_names = scale.spellings()[0]
 note_names += (note_names[0], )  # make it 8 notes
 
 for right_hand in (False, True):
+    fingerings = scale.fingerings(right_hand=right_hand)
+    fingering = fingerings[0]
     thumb_map = scale.thumb_scores(right_hand=right_hand)
-    fingering = scale.fingerings(right_hand=right_hand)[0]
     annotated = zip(note_names, thumb_map)
-    colored = (color(n, sp, sc) for n, (sp, sc) in annotated)
+    colored = (color(n, sp, sc, 4) for n, (sp, sc) in annotated)
     print()
     print(''.join(colored))
-    print(''.join(str(f).ljust(4) for f in str(fingering)))
+    print(pad(fingering, 4))
+
+    if args.all:
+        for i in range(1, len(fingerings)):
+            print(pad(fingerings[i], 4),
+                  fingerings[i-1].compare(fingerings[i])[1])
