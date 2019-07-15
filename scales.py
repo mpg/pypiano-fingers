@@ -218,32 +218,33 @@ class ScaleFingering:
 
     base = (1, 2, 3, 1, 2, 3, 4)
 
-    def __init__(self, scale_8_notes, i, *, right_hand):
-        """Create a fingering for the given notes, hand and index.
+    def __init__(self, thumb_map, i):
+        """Create a fingering for the given thumb convenience map and index.
+
+        The thumb convenience map is a ScaleThumbMap object.
 
         The index is used to rotate the basic fingering 1231234 into one of
         the 7 possible fingerings that follow the same pattern.
         """
+        self.map = thumb_map
+
         # set up fingers by rotating "base" (C major) fingering
         # and extending to 8 notes
         self.fingers = self.base[i:] + self.base[:i]
         self.fingers += (5 if self.fingers[-1] == 4 else self.fingers[0], )
 
-        # get thumb score maps and extract data for our thumb positions
-        self.map = ScaleThumbMap(scale_8_notes, right_hand=right_hand)
-        self.thumb_scores = tuple(s for f, s in zip(self.fingers,
-                                                    self.map.scores)
-                                  if f == 1)
+        # extract thumb score for our thumb positions
+        finger_scores = zip(self.fingers, thumb_map.scores)
+        self.thumb_scores = tuple(s for f, s in finger_scores if f == 1)
 
     def __str__(self):
         """Return fingering as a string of 8 digits."""
         return ''.join(self.map.symmetry(tuple(str(f) for f in self.fingers)))
 
     @staticmethod
-    def each(scale_8_notes, *, right_hand):
-        """Iterate of all possible fingerings for a given 8-note series."""
-        return (ScaleFingering(scale_8_notes, i, right_hand=right_hand)
-                for i in range(7))
+    def each(thumb_map):
+        """Iterate over all fingerings for a scale given by it thumbs map."""
+        return (ScaleFingering(thumb_map, i) for i in range(7))
 
     def is_acceptable(self):
         """Return False if that fingering puts the thumb on a black key."""
@@ -319,6 +320,12 @@ class Scale:
             notes.append(notes[-1] + i)
         self.notes = tuple(notes)
 
+        # compute thumb convenience maps for each hand
+        self.maps = dict(
+                (right_hand, ScaleThumbMap(self.notes, right_hand=right_hand))
+                for right_hand in (False, True)
+        )
+
     @staticmethod
     def each(circle_of_fifths=True):
         """Iterate over all scales, by circle of fifths of chromatically.
@@ -377,5 +384,5 @@ class Scale:
 
     def fingerings(self, *, right_hand):
         """Return a tuple of acceptable fingers with most preferred first."""
-        fs = ScaleFingering.each(self.notes, right_hand=right_hand)
+        fs = ScaleFingering.each(self.maps[right_hand])
         return tuple(sorted(f for f in fs if f.is_acceptable()))
