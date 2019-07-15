@@ -386,3 +386,13 @@ class Scale:
         """Return a tuple of acceptable fingers with most preferred first."""
         fs = ScaleFingering.each(self.maps[right_hand])
         return tuple(sorted(f for f in fs if f.is_acceptable()))
+
+    def thumb_scores(self, *, right_hand):
+        """Return a tuple of thumb scores associated with each note.
+
+        Each score is a pair of:
+        - does the thumb goes here in C Major? (boolean)
+        - numerical convenience score from -2 to 1, see ScaleThumbMap.score.
+        """
+        m = self.maps[right_hand]
+        return m.symmetry(m.scores)

@@ -7,6 +7,8 @@
 
 import argparse
 
+from colorama import Fore, Style
+
 from scales import Scale, Note, Mode
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -16,13 +18,24 @@ parser.add_argument('index',
                     nargs='?', default=None)
 args = parser.parse_args()
 
+code_std_pos = {
+        True: Style.BRIGHT,
+        False: Style.NORMAL,
+}
+code_score = {
+        -2: Fore.RED,
+        -1: Fore.YELLOW,
+        0: Fore.WHITE,
+        1: Fore.GREEN,
+}
 
-def print_comparison(fingerings):
-    """Print possible fingerings with criterion justifying each comparison."""
-    print()
-    for i in range(len(fingerings) - 1):
-        print(fingerings[i], fingerings[i].compare(fingerings[i+1]))
-    print(fingerings[-1])
+
+def color(name, std_pos, score):
+    """Apply color-coding to note name."""
+    return (code_std_pos[std_pos] +
+            code_score[score] +
+            name.ljust(4) +
+            Style.RESET_ALL)
 
 
 if args.index:
@@ -30,9 +43,16 @@ if args.index:
 else:
     scale = Scale.random()
 
-rh = scale.fingerings(right_hand=True)
-lh = scale.fingerings(right_hand=False)
-print('{} {} {}'.format(scale, lh[0], rh[0]))
+print(scale)
 
-print_comparison(lh)
-print_comparison(rh)
+note_names = scale.spellings()[0]
+note_names += (note_names[0], )  # make it 8 notes
+
+for right_hand in (False, True):
+    thumb_map = scale.thumb_scores(right_hand=right_hand)
+    fingering = scale.fingerings(right_hand=right_hand)[0]
+    annotated = zip(note_names, thumb_map)
+    colored = (color(n, sp, sc) for n, (sp, sc) in annotated)
+    print()
+    print(''.join(colored))
+    print(''.join(str(f).ljust(4) for f in str(fingering)))
