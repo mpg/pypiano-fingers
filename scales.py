@@ -154,6 +154,65 @@ class Mode:
         return self.name
 
 
+class ScaleThumbMap:
+    """Map of where the thumb can, should and should not go in a scale.
+
+    The main member of interest is scores which is a 8-tuple of pairs:
+    - boolean indicating whether the thumb goes there in C Major
+    - convenience score for placing the thumb here.
+
+    Other members are:
+    - symmetry: used to unite left and right hand (see __init__)
+    - notes: the notes with this symmetry applied
+    """
+
+    c_major_thumb = (True, False, False, True, False, False, False, True)
+
+    def __init__(self, scale_8_notes, *, right_hand):
+        """Create a map for the given notes and hand."""
+        # For left hand, internally work with descending fingering
+        # in order to unify with right hand:
+        # - reverse the notes internally;
+        # - reverse the fingers when printing.
+        #
+        # (That's the reason we want 8 notes in the scale.)
+        self.symmetry = (lambda l: l) if right_hand else (lambda l: l[::-1])
+        self.notes = self.symmetry(scale_8_notes)
+
+        self.scores = []
+        for i in range(8):
+            note = self.notes[i]
+            prev = self.notes[i-1]
+            self.scores.append(self.score(note, prev))
+
+        # pack convenience score with whether the thumb goes there in C major
+        self.scores = tuple(zip(self.c_major_thumb, self.scores))
+
+    @staticmethod
+    def score(note, prev):
+        """Return a thumb convenience score for the given pair of notes.
+
+        Scoring is as follows:
+        -2 forbidden (black key)
+        -1 inconvenient (passing on augmented second)
+        0 neutral
+        1 convenient (passing after black key)
+        """
+        if note.is_black():
+            return -2
+
+        dist = abs(note.rank - prev.rank)
+        if dist > 6:
+            dist = 12 - dist
+        if dist > 2:
+            return -1
+
+        if prev.is_black():
+            return 1
+
+        return 0
+
+
 class ScaleFingering:
     """A fingering for a 7-notes scale."""
 
@@ -165,23 +224,20 @@ class ScaleFingering:
         The index is used to rotate the basic fingering 1231234 into one of
         the 7 possible fingerings that follow the same pattern.
         """
-        # For left hand, internally work with descending fingering
-        # in order to unify with right hand:
-        # - reverse the notes internally;
-        # - reverse the fingers when printing.
-        #
-        # (That's the reason we want 8 notes in the scale.)
-        self.symmetry = (lambda l: l) if right_hand else (lambda l: l[::-1])
-        self.notes = self.symmetry(scale_8_notes)
-
         # set up fingers by rotating "base" (C major) fingering
         # and extending to 8 notes
         self.fingers = self.base[i:] + self.base[:i]
         self.fingers += (5 if self.fingers[-1] == 4 else self.fingers[0], )
 
+        # get thumb score maps and extract data for our thumb positions
+        self.map = ScaleThumbMap(scale_8_notes, right_hand=right_hand)
+        self.thumb_scores = tuple(s for f, s in zip(self.fingers,
+                                                    self.map.scores)
+                                  if f == 1)
+
     def __str__(self):
         """Return fingering as a string of 8 digits."""
-        return ''.join(self.symmetry(tuple(str(f) for f in self.fingers)))
+        return ''.join(self.map.symmetry(tuple(str(f) for f in self.fingers)))
 
     @staticmethod
     def each(scale_8_notes, *, right_hand):
@@ -191,14 +247,11 @@ class ScaleFingering:
 
     def is_acceptable(self):
         """Return False if that fingering puts the thumb on a black key."""
-        for note, finger in zip(self.notes, self.fingers):
-            if finger == 1 and note.is_black():
-                return False
-        return True
+        return not any(s[1] == -2 for s in self.thumb_scores)
 
     def ends_with_pinky(self):
         """Return True if this is the familiar C Major fingering."""
-        return self.fingers[-1] == 5
+        return all(s[0] for s in self.thumb_scores)
 
     def starts_with_thumb(self):
         """Return True if this fingering puts the thumb on the tonic."""
@@ -206,21 +259,11 @@ class ScaleFingering:
 
     def has_long_passing(self):
         """Return True on thumb-passings on interval larger than a second."""
-        for i in range(7):
-            dist = abs(self.notes[i].rank - self.notes[i-1].rank)
-            if dist > 6:
-                dist = 12 - dist
-            if dist > 2 and self.fingers[i] == 1:
-                return True
-        return False
+        return any(s[1] == -1 for s in self.thumb_scores)
 
     def nb_black_passings(self):
         """Return the number of times passing the thumb after a black key."""
-        black_passings = 0
-        for i in range(7):
-            if self.fingers[i] == 1 and self.notes[i-1].is_black():
-                black_passings += 1
-        return black_passings
+        return sum(1 for s in self.thumb_scores if s[1] == 1)
 
     def compare(self, other):
         """Compare to another fingering and return preference code and reason.
