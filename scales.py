@@ -258,9 +258,9 @@ class ScaleFingering:
         """Return True if this fingering puts the thumb on the tonic."""
         return self.fingers[0] == 1
 
-    def has_long_passing(self):
-        """Return True on thumb-passings on interval larger than a second."""
-        return any(s[1] == -1 for s in self.thumb_scores)
+    def has_no_long_passing(self):
+        """Return False on thumb-passings on interval larger than a second."""
+        return not any(s[1] == -1 for s in self.thumb_scores)
 
     def nb_black_passings(self):
         """Return the number of times passing the thumb after a black key."""
@@ -279,11 +279,11 @@ class ScaleFingering:
         # this function was designed to prefer the standard fingering
         # for each of the 24 major and minor (harmonic) scales for both hands
         #
-        # we use the following list of (un)desirable criteria:
+        # we use the following list of desirable criteria:
         criteria = (
                 ('ends_with_pinky',     +1),
                 ('starts_with_thumb',   +1),
-                ('has_long_passing',    -1),
+                ('has_no_long_passing', +1),
                 ('nb_black_passings',   +1),
         )
 
@@ -291,9 +291,9 @@ class ScaleFingering:
             s = getattr(self, name)()
             o = getattr(other, name)()
 
-            cmp = ((s > o) - (s < o)) * desirability
-            if cmp != 0:
-                return cmp, name
+            comp = ((s > o) - (s < o)) * desirability
+            if comp != 0:
+                return comp, name
 
         return 0, ''
 

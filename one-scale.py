@@ -61,12 +61,16 @@ for right_hand in (False, True):
     fingering = fingerings[0]
     thumb_map = scale.thumb_scores(right_hand=right_hand)
     annotated = zip(note_names, thumb_map)
-    colored = (color(n, sp, sc, 4) for n, (sp, sc) in annotated)
+    colored = (color(n, sp, sc, 5) for n, (sp, sc) in annotated)
     print()
     print(''.join(colored))
-    print(pad(fingering, 4))
+    print(pad(fingering, 5), end='')
 
     if args.all:
         for i in range(1, len(fingerings)):
-            print(pad(fingerings[i], 4),
-                  fingerings[i-1].compare(fingerings[i])[1])
+            print(fingerings[i-1].compare(fingerings[i])[1])
+            print(pad(fingerings[i], 5), end='')
+        if len(fingerings) == 1:
+            print('(single)', end='')
+
+    print()
