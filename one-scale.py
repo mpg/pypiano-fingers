@@ -7,7 +7,11 @@
 
 import argparse
 
-from colorama import Fore, Style
+# colorama brings windows compat, but that's optional
+try:
+    import colorama
+except ImportError:
+    colorama = None
 
 from scales import Scale, Note, Mode
 
@@ -21,15 +25,34 @@ parser.add_argument('-a', '--all',
                     action='store_true')
 args = parser.parse_args()
 
+
+if colorama:
+    RED = colorama.Fore.RED
+    YELLOW = colorama.Fore.YELLOW
+    WHITE = colorama.Fore.WHITE
+    GREEN = colorama.Fore.GREEN
+    BRIGHT = colorama.Style.BRIGHT
+    NORMAL = colorama.Style.NORMAL
+    RESET = colorama.Style.RESET_ALL
+else:
+    RED = '\x1b[31m'
+    YELLOW = '\x1b[33m'
+    WHITE = '\x1b[37m'
+    GREEN = '\x1b[32m'
+    BRIGHT = '\x1b[1m'
+    NORMAL = '\x1b[21m'
+    RESET = '\x1b[0m'
+
+
 code_std_pos = {
-        True: Style.BRIGHT,
-        False: Style.NORMAL,
+        True: BRIGHT,
+        False: NORMAL,
 }
 code_score = {
-        -2: Fore.RED,
-        -1: Fore.YELLOW,
-        0: Fore.WHITE,
-        1: Fore.GREEN,
+        -2: RED,
+        -1: YELLOW,
+        0: WHITE,
+        1: GREEN,
 }
 
 
@@ -38,7 +61,7 @@ def color(name, std_pos, score, width):
     return (code_std_pos[std_pos] +
             code_score[score] +
             name.ljust(width) +
-            Style.RESET_ALL)
+            RESET)
 
 
 def pad(fingering, width):
