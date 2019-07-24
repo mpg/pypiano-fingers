@@ -23,6 +23,9 @@ parser.add_argument('index',
 parser.add_argument('-a', '--all',
                     help='show all acceptable fingerings',
                     action='store_true')
+parser.add_argument('-l', '--legend',
+                    help='show a legend of colors and criteria',
+                    action='store_true')
 args = parser.parse_args()
 
 
@@ -97,3 +100,28 @@ for right_hand in (False, True):
             print('(single)', end='')
 
     print()
+
+
+def show(style, text):
+    """Show description text in the corresponding style."""
+    print(style + text + RESET)
+
+
+if args.legend:
+    print()
+    print("Color/brightness legend:")
+    show(RED, "Never put thumb here (black key)")
+    show(YELLOW, "Avoid putting thumb here (passing on augmented second)")
+    show(WHITE, "Can put thumb here (white key)")
+    show(GREEN, "Prefer putting thumb here (passing after black key)")
+    show(BRIGHT + WHITE, "Thumb goes there in C Major fingering (preferred)")
+
+if args.legend and args.all:
+    print()
+    print("Sorting criteria (why is this fingering preferred to the next?):")
+    print("(single): this is the only fingering with no thumb on black keys")
+    print("ends_with_pinky: this is the standard C Major fingering")
+    print("starts_with_thumb: has thumb on tonic")
+    print("has_no_long_passing: avoids passing thumb on augmented second")
+    print("nb_black_passings: passes thumb after black key more often")
+    print("(nothing): can't decide between this and the next fingering")
