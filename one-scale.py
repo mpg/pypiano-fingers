@@ -72,7 +72,7 @@ def pad(fingering, width):
     return ''.join(str(f).ljust(width) for f in str(fingering))
 
 
-if args.index:
+if args.index is not None:
     scale = Scale(Note(args.index // 2), Mode(args.index % 2))
 else:
     scale = Scale.random()
