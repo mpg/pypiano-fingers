@@ -12,7 +12,7 @@ Classes:
     - Scale: a scale, defined by tonic and mode.
 """
 
-import secrets
+import random
 
 
 class Note:
@@ -57,7 +57,7 @@ class Note:
     @staticmethod
     def random():
         """Return a note chosen at random."""
-        return Note(secrets.randbelow(12))
+        return Note(random.randrange(12))
 
     def __init__(self, rank):
         """Create a note with the given rank."""
@@ -141,7 +141,7 @@ class Mode:
     @classmethod
     def random(cls):
         """Return a mode chosen at random."""
-        return Mode(secrets.randbelow(len(cls.intervals_list)))
+        return Mode(random.randrange(len(cls.intervals_list)))
 
     def __init__(self, index):
         """Create a mode given by its index: 0 = Major, 1 = Minor harmonic."""
