@@ -347,6 +347,13 @@ class Scale:
         """Return a scale chosen at random."""
         return Scale(Note.random(), Mode.random())
 
+    @staticmethod
+    def all_random():
+        """Return a randomly shuffled list of all scales."""
+        scales = list(Scale.each(False))
+        random.shuffle(scales)
+        return scales
+
     def spellings(self):
         """Return a one or two-element list of 7-tuples with note names.
 

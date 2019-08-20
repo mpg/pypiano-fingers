@@ -13,6 +13,9 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-c', '--chromatic',
                     help='sort chromatically rather than by circle-of-fifths',
                     action='store_true')
+parser.add_argument('-r', '--random',
+                    help='sort randomly',
+                    action='store_true')
 parser.add_argument('-e', '--explain',
                     help='explain why those fingerings were chosen',
                     action='store_true')
@@ -52,7 +55,8 @@ def reason(fingerings):
     return fingerings[0].compare(fingerings[1])[1]
 
 
-for scale in Scale.each(not args.chromatic):
+scales = Scale.all_random() if args.random else Scale.each(not args.chromatic)
+for scale in scales:
     if scale.mode.index not in allowed_modes[args.modes]:
         continue
 
