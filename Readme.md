@@ -19,7 +19,7 @@ There are three scripts using it to provide a command-line interface for
 common operations:
 
 - `all-scales.py` for basic information about each scale
-- `grp-scales.py` for listing groups of scales that share identical fingerings
+- `grp-scales.py` for listing groups of scales that share similar fingerings
 - `one-scale.py` for detailed information about a single scale (by default chosen at
   random, which can be used for daily practice).
 
