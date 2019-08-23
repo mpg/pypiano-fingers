@@ -303,6 +303,32 @@ class ScaleFingering:
         # puts the preferred fingerings first without reversing
         return self.compare(other)[0] > 0
 
+    def is_group1(self):
+        """Return True if this is the standard C Major fingering."""
+        return self.ends_with_pinky()
+
+    def is_group2(self):
+        """Return True if the 4th finger is on the same key as in F♯ Major."""
+        fourth_position = self.fingers.index(4)
+        fourth_note = self.map.notes[fourth_position]
+        fourth_note_wanted = self.map.symmetry((10, 6))[0]
+        return fourth_note.rank == fourth_note_wanted
+
+    def is_group3(self):
+        """Return True is this is neither group 1 or 2."""
+        return not (self.is_group1() or self.is_group2())
+
+    def groups(self):
+        """Return a tuple of groups this fingering belongs to."""
+        groups = tuple()
+        if self.is_group1():
+            groups += (1,)
+        if self.is_group2():
+            groups += (2,)
+        if self.is_group3():
+            groups += (3,)
+        return groups
+
 
 class Scale:
     """A 7-notes scale defined by tonic and mode."""

@@ -20,9 +20,14 @@ parser.add_argument('-H', '--hands',
                     choices=('left', 'right', 'both'),
                     default='both',
                     action='store')
-parser.add_argument('-4', '--fourth',
-                    help='group by 4-th finger note (rather than fingering)',
-                    action='store_true')
+criterion = parser.add_mutually_exclusive_group()
+criterion.add_argument('-4', '--fourth',
+                       help='sort by 4-th finger note (rather than fingering)',
+                       action='store_true')
+criterion.add_argument('-p', '--predefined',
+                       help='sort by pre-defined groups: 1. C Major fingering;\
+                       2. fingers on the same notes as in F# Major; 3. other',
+                       action='store_true')
 args = parser.parse_args()
 
 allowed_modes = {
@@ -39,14 +44,18 @@ allowed_hands = {
 
 
 def hand_index(scale, *, right_hand):
-    """Compute index (fingering or 4-th finger note) for this hand."""
-    fingering = str(scale.fingerings(right_hand=right_hand)[0])
-    if not args.fourth:
-        return fingering
+    """Compute index (fingering, 4th finger note, or groups) for this hand."""
+    fingering = scale.fingerings(right_hand=right_hand)[0]
 
-    fourth_position = fingering.index('4')
-    fourth_note = scale.notes[fourth_position]
-    return str(fourth_note)
+    if args.fourth:
+        fourth_position = str(fingering).index('4')
+        fourth_note = scale.notes[fourth_position]
+        return str(fourth_note)
+
+    if args.predefined:
+        return 'g' + ''.join(str(g) for g in fingering.groups())
+
+    return str(fingering)
 
 
 groups = dict()
