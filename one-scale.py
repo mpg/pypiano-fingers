@@ -85,11 +85,15 @@ note_names += (note_names[0], )  # make it 8 notes
 for right_hand in (False, True):
     fingerings = scale.fingerings(right_hand=right_hand)
     fingering = fingerings[0]
+
     thumb_map = scale.thumb_scores(right_hand=right_hand)
     annotated = zip(note_names, thumb_map)
     colored = (color(n, sp, sc, 5) for n, (sp, sc) in annotated)
+
+    groups = 'g' + ''.join(str(g) for g in fingering.groups())
+
     print()
-    print(''.join(colored))
+    print(''.join(colored), groups)
     print(pad(fingering, 5), end='')
 
     if args.all:
