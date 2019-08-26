@@ -70,6 +70,12 @@ for scale in Scale.each():
     if want_right:
         index += (hand_index(scale, right_hand=True), )
 
+    if args.predefined and args.hands == 'both' and 'g12' in index:
+        if 'g1' in index:
+            index = ('g1', 'g1')
+        elif 'g2' in index:
+            index = ('g2', 'g2')
+
     if index not in groups:
         groups[index] = list()
     groups[index].append(scale)
